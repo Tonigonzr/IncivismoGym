@@ -4,6 +4,7 @@ import android.Manifest;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.MediaStore;
@@ -18,10 +19,13 @@ import com.firebase.ui.auth.AuthUI;
 import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
 import com.google.android.gms.location.FusedLocationProviderClient;
 import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -34,8 +38,13 @@ import androidx.navigation.ui.NavigationUI;
 import com.example.incivismogym.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
+import java.io.ByteArrayOutputStream;
 import java.util.Arrays;
+import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -46,6 +55,9 @@ public class MainActivity extends AppCompatActivity {
     private SharedViewModel sharedViewModel;
     private static final int REQUEST_IMAGE_CAPTURE = 1;
     private ImageView imageView;
+    private DatabaseReference mDatabase;
+    private StorageReference mStorageRef;
+
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -114,6 +126,37 @@ public class MainActivity extends AppCompatActivity {
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             imageView.setImageBitmap(imageBitmap);
+
+            // Convertir la imagen a JPEG
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
+            byte[] dataImage = baos.toByteArray();
+
+            // Subir imagen a Firebase Storage
+            String path = "images/" + UUID.randomUUID() + ".jpg";
+            StorageReference imagesRef = mStorageRef.child(path);
+            UploadTask uploadTask = imagesRef.putBytes(dataImage);
+            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    // Obtener la URL de descarga de la imagen subida
+                    imagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // Guardar la URL de la imagen en la base de datos de Firebase Realtime Database
+                            String imageUrl = uri.toString();
+                            mDatabase.child("images").push().setValue(imageUrl);
+                            Toast.makeText(MainActivity.this, "Imagen subida a Firebase", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Log.e("Firebase", "Error al subir imagen a Firebase", e);
+                    Toast.makeText(MainActivity.this, "Error al subir imagen a Firebase", Toast.LENGTH_SHORT).show();
+                }
+            });
         }
     }
     @Override
