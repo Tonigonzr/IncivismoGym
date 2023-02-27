@@ -1,12 +1,16 @@
 package com.example.incivismogym.ui.notifications;
 
+import android.app.AlertDialog;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -15,6 +19,9 @@ import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
 
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.SimpleTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.incivismogym.Incidencia;
 import com.example.incivismogym.R;
 import com.example.incivismogym.databinding.FragmentNotificationsBinding;
@@ -30,6 +37,7 @@ import org.osmdroid.api.IMapController;
 import org.osmdroid.config.Configuration;
 import org.osmdroid.tileprovider.tilesource.TileSourceFactory;
 import org.osmdroid.util.GeoPoint;
+import org.osmdroid.views.MapView;
 import org.osmdroid.views.overlay.Marker;
 import org.osmdroid.views.overlay.compass.CompassOverlay;
 import org.osmdroid.views.overlay.compass.InternalCompassOrientationProvider;
@@ -103,16 +111,38 @@ public class NotificationsFragment extends Fragment {
         incidencies.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
                 Incidencia incidencia = snapshot.getValue(Incidencia.class);
                 Marker m = new Marker(binding.map);
                 m.setPosition(new GeoPoint(Double.parseDouble(incidencia.getLatitud()), Double.parseDouble(incidencia.getLongitud())));
                 m.setTextLabelFontSize(40);
-                m.setIcon(getResources().getDrawable(R.drawable.ic_dashboard_black_24dp));
+                m.setIcon(getResources().getDrawable(R.drawable.ic_baseline_house_24));
                 m.setAnchor(Marker.ANCHOR_CENTER, Marker.ANCHOR_TOP);
                 m.setTitle(incidencia.getDireccio());
                 m.setSnippet(incidencia.getProblema());
-                binding.map.getOverlays().add(m);
+                m.setOnMarkerClickListener(new Marker.OnMarkerClickListener(){
+                    @Override
+                    public boolean onMarkerClick(Marker marker, MapView mapView) {
+                        String imagen = "https://firebasestorage.googleapis.com/v0/b/incivismogym.appspot.com/o/Fotos%2F";
+                        Glide.with(getContext()).load(imagen + incidencia.getUrl() + "?alt=media&token=" + incidencia.getUrl()).into(new SimpleTarget<Drawable>() {
+                            @Override
+                            public void onResourceReady(@NonNull Drawable resource, @Nullable Transition<? super Drawable> transition) {
+                                // Aquí se carga la imagen en un ImageView
+                                ImageView imageView = new ImageView(getContext());
+                                imageView.setImageDrawable(resource);
 
+
+                                // Aquí se muestra la imagen en un diálogo
+                                AlertDialog.Builder builder = new AlertDialog.Builder(getContext());
+                                builder.setTitle(incidencia.getDireccio());
+                                builder.setView(imageView);
+                                builder.create().show();
+                            }
+                        });
+                        return true;
+                    }
+                });
+                binding.map.getOverlays().add(m);
             }
 
             @Override

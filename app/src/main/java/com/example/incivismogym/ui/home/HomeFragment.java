@@ -112,6 +112,11 @@ public class HomeFragment extends Fragment {
         sharedViewModel.getUser().observe(getViewLifecycleOwner(), user -> {
             authUser = user;
         });
+        sharedViewModel.getCurrentLatLng().observe(getViewLifecycleOwner(), latlng -> {
+            binding.txtLatitud.setText(String.valueOf(latlng.latitude));
+            binding.txtLongitud.setText(String.valueOf(latlng.longitude));
+
+        });
 
         binding.buttonNotificar.setOnClickListener(button -> {
             if(DARDEALTA == false){
