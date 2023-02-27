@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "970694263637",
+    "project_id": "incivismogym",
+    "storage_bucket": "incivismogym.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:970694263637:android:537ff8e32a67d413cd25dc",
+        "android_client_info": {
+          "package_name": "com.example.incivismogym"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "970694263637-iv0o0vs0e8ntv3sd3vffjcclq62aplv8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB63GmfB28rutL3sJ7dXAUOV7UOmlV_Swc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "970694263637-iv0o0vs0e8ntv3sd3vffjcclq62aplv8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
