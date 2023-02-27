@@ -7,6 +7,7 @@ public class Incidencia {
     String longitud;
     String direccio;
     String problema;
+    String Url;
 
     public Incidencia() {
 
@@ -42,6 +43,14 @@ public class Incidencia {
 
     public void setProblema(String problema) {
         this.problema = problema;
+    }
+
+    public String getUrl() {
+        return Url;
+    }
+
+    public void setUrl(String url) {
+        Url = url;
     }
 
     public Incidencia(String latitud, String longitud, String direccio, String problema) {

@@ -1,6 +1,9 @@
 package com.example.incivismogym;
 
+import static java.security.AccessController.getContext;
+
 import android.Manifest;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -39,6 +42,8 @@ import com.example.incivismogym.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 
@@ -53,10 +58,8 @@ public class MainActivity extends AppCompatActivity {
     private ActivityResultLauncher<String[]> locationPermissionRequest;
 
     private SharedViewModel sharedViewModel;
-    private static final int REQUEST_IMAGE_CAPTURE = 1;
-    private ImageView imageView;
-    private DatabaseReference mDatabase;
-    private StorageReference mStorageRef;
+
+
 
     @RequiresApi(api = Build.VERSION_CODES.N)
     @Override
@@ -103,62 +106,9 @@ public class MainActivity extends AppCompatActivity {
                         sharedViewModel.setUser(user);
                     }
                 });
-        Button foto = (Button) findViewById(R.id.button_foto);
 
-        foto.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                dispatchTakePictureIntent();
-
-            }
-        });
     }
-    private void dispatchTakePictureIntent() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            startActivityForResult(takePictureIntent,REQUEST_IMAGE_CAPTURE);
-        }
-    }
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Bundle extras = data.getExtras();
-            Bitmap imageBitmap = (Bitmap) extras.get("data");
-            imageView.setImageBitmap(imageBitmap);
 
-            // Convertir la imagen a JPEG
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, baos);
-            byte[] dataImage = baos.toByteArray();
-
-            // Subir imagen a Firebase Storage
-            String path = "images/" + UUID.randomUUID() + ".jpg";
-            StorageReference imagesRef = mStorageRef.child(path);
-            UploadTask uploadTask = imagesRef.putBytes(dataImage);
-            uploadTask.addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                @Override
-                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    // Obtener la URL de descarga de la imagen subida
-                    imagesRef.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            // Guardar la URL de la imagen en la base de datos de Firebase Realtime Database
-                            String imageUrl = uri.toString();
-                            mDatabase.child("images").push().setValue(imageUrl);
-                            Toast.makeText(MainActivity.this, "Imagen subida a Firebase", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
-            }).addOnFailureListener(new OnFailureListener() {
-                @Override
-                public void onFailure(@NonNull Exception e) {
-                    Log.e("Firebase", "Error al subir imagen a Firebase", e);
-                    Toast.makeText(MainActivity.this, "Error al subir imagen a Firebase", Toast.LENGTH_SHORT).show();
-                }
-            });
-        }
-    }
     @Override
     protected void onStart() {
         super.onStart();
