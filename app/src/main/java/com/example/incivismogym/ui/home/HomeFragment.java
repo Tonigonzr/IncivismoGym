@@ -105,7 +105,7 @@ public class HomeFragment extends Fragment {
         });
 
         ImageView Foto = binding.foto.findViewById(R.id.foto);
-        Button buttonFoto = binding.buttonFoto.findViewById(R.id.button_foto);
+      //  Button buttonFoto = binding.buttonFoto.findViewById(R.id.button_foto);
 
         sharedViewModel.switchTrackingLocation();
 
@@ -143,6 +143,9 @@ public class HomeFragment extends Fragment {
                 DARDEALTA = false;
                 foto.setImageDrawable(getResources().getDrawable(R.drawable.ic_home_black_24dp));
             }
+        });
+        binding.Permisos.setOnClickListener(button ->{
+            requestPermission();
         });
 
         return root;
@@ -183,7 +186,7 @@ public class HomeFragment extends Fragment {
 
         ref.putFile(photoURI).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
             @Override
-            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {storageRef = ref;
             }
         }).addOnFailureListener(new OnFailureListener() {
             @Override

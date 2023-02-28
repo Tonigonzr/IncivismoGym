@@ -10,6 +10,9 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions;
+import com.bumptech.glide.request.RequestOptions;
 import com.example.incivismogym.Incidencia;
 import com.example.incivismogym.SharedViewModel;
 import com.example.incivismogym.databinding.FragmentDashboardBinding;
@@ -28,6 +31,7 @@ public class DashboardFragment extends Fragment {
 
     private FragmentDashboardBinding binding;
     private FirebaseUser authUser;
+    private String imagen = "https://firebasestorage.googleapis.com/v0/b/incivismogym.appspot.com/o/Fotos%2F";
 
     public View onCreateView(@NonNull LayoutInflater inflater,
                              ViewGroup container, Bundle savedInstanceState) {
@@ -82,8 +86,17 @@ public class DashboardFragment extends Fragment {
         protected void onBindViewHolder(
                 @NonNull IncidenciaViewholder holder, int position, @NonNull Incidencia model
         ) {
-            holder.binding.txtDescripcio.setText(model.getProblema());
-            holder.binding.txtAdreca.setText(model.getDireccio());
+            try{
+                Glide.with(getContext())
+                        .load(imagen + model.getUrl() + "?alt=media&token=" + model.getUrl())
+                        .into(holder.binding.imagenRow);
+                holder.binding.txtDescripcio.setText(model.getProblema());
+                holder.binding.txtAdreca.setText(model.getDireccio());
+            }catch (Exception e){
+                e.printStackTrace();
+            }
+
+
         }
 
         @NonNull
